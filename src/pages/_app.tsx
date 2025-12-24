@@ -7,7 +7,6 @@ import { useRouter } from 'next/router';
 import { useEffect } from 'react';
 import { trackPageVisit } from '../utils/track';
 import { I18nProvider } from '@/contexts/I18nContext';
-import { useLocalizedNavigation } from '@/hooks/useLocalizedNavigation';
 
 function MyApp({ Component, pageProps }) {
   const {
@@ -23,9 +22,6 @@ function MyApp({ Component, pageProps }) {
 
   const router = useRouter();
   const { BUILD_ENV } = process.env;
-  
-  // Enable localized navigation
-  useLocalizedNavigation();
 
   useEffect(() => {
     const handleRouteChange = () => {

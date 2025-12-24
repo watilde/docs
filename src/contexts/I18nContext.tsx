@@ -15,10 +15,24 @@ export function I18nProvider({ children }: { children: ReactNode }) {
   const [locale, setLocaleState] = useState<Locale>('en');
   const [messages, setMessages] = useState<Record<string, any>>({});
 
-  // Initialize locale from URL path
+  // Initialize locale from localStorage or URL
   useEffect(() => {
-    const pathLocale = getLocaleFromPathname(router.asPath);
-    setLocaleState(pathLocale);
+    if (typeof window !== 'undefined') {
+      // First check URL
+      const pathLocale = getLocaleFromPathname(router.asPath);
+      
+      if (pathLocale !== 'en') {
+        // URL has explicit locale
+        setLocaleState(pathLocale);
+        localStorage.setItem('locale', pathLocale);
+      } else {
+        // Check localStorage
+        const savedLocale = localStorage.getItem('locale') as Locale;
+        if (savedLocale && savedLocale !== 'en') {
+          setLocaleState(savedLocale);
+        }
+      }
+    }
   }, [router.asPath]);
 
   useEffect(() => {
@@ -35,14 +49,11 @@ export function I18nProvider({ children }: { children: ReactNode }) {
     if (typeof window !== 'undefined') {
       localStorage.setItem('locale', newLocale);
       
-      // Get current path without locale
-      const currentPath = router.asPath;
-      const cleanPath = stripLocaleFromPathname(currentPath);
+      // Update HTML lang attribute dynamically
+      document.documentElement.lang = newLocale;
       
-      // Add new locale prefix
-      const newPath = addLocaleToPathname(cleanPath, newLocale);
-      
-      router.push(newPath);
+      // Reload to ensure all page context uses new locale
+      window.location.reload();
     }
   };
 
