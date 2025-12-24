@@ -39,8 +39,11 @@ try {
   pipeline = transformers.pipeline;
 } catch (error) {
   console.log('⚠️  @huggingface/transformers not installed (optional)');
-  console.log('   To enable auto-translation, run:');
-  console.log('   yarn add -D @huggingface/transformers\n');
+  console.log('   Error:', error.message);
+  console.log('\n   To enable auto-translation:');
+  console.log('   1. Run: yarn install (to install from package.json)');
+  console.log('   2. Or run: yarn add -D @huggingface/transformers');
+  console.log('   3. Verify: ls node_modules/@huggingface/transformers\n');
   console.log(
     '✅ Skipping auto-translation (translations can be added manually)\n'
   );

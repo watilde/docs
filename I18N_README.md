@@ -82,6 +82,63 @@ If Japanese translation is missing, English is shown automatically.
 
 See [I18N_IMPLEMENTATION.md](./I18N_IMPLEMENTATION.md) for detailed instructions.
 
+## Troubleshooting
+
+### `@huggingface/transformers not installed` Error
+
+If you see this warning during `yarn dev`:
+
+```bash
+⚠️  @huggingface/transformers not installed (optional)
+```
+
+**Cause**: The package is in `package.json` but not installed in `node_modules`.
+
+**Solutions**:
+
+1. **Install dependencies** (most common):
+   ```bash
+   yarn install
+   ```
+
+2. **Clean install** (if yarn.lock is out of sync):
+   ```bash
+   rm -rf node_modules
+   yarn install
+   ```
+
+3. **Verify installation**:
+   ```bash
+   ls node_modules/@huggingface/transformers
+   ```
+
+4. **Manual install** (as a last resort):
+   ```bash
+   yarn add -D @huggingface/transformers
+   ```
+
+**Note**: Auto-translation is optional. The app works fine without it - you can add Japanese translations manually to `public/locales/ja/common.json`.
+
+### Pages Not Generating
+
+If Japanese pages aren't being generated:
+
+1. **Check prebuild script runs**:
+   ```bash
+   yarn dev
+   # Should show: "🌐 Generating Japanese locale pages..."
+   ```
+
+2. **Manually run generation**:
+   ```bash
+   node scripts/generate-locale-pages.mjs
+   ```
+
+3. **Check output directory**:
+   ```bash
+   ls src/pages/ja/
+   ```
+
 ## Benefits
 
 ✅ Real URLs for each locale  
