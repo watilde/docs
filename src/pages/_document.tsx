@@ -109,8 +109,12 @@ const getCspContent = (context) => {
 
 export default class MyDocument extends Document {
   render() {
+    // Get locale from pathname
+    const pathname = this.props.__NEXT_DATA__.page;
+    const locale = pathname.startsWith('/ja') ? 'ja' : 'en';
+    
     return (
-      <Html lang="en">
+      <Html lang={locale}>
         <Head>
           <meta
             httpEquiv="Content-Security-Policy"

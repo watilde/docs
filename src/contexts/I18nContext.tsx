@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { useRouter } from 'next/router';
 
 export type Locale = 'en' | 'ja';
 
@@ -11,8 +12,15 @@ interface I18nContextType {
 const I18nContext = createContext<I18nContextType | undefined>(undefined);
 
 export function I18nProvider({ children }: { children: ReactNode }) {
+  const router = useRouter();
   const [locale, setLocaleState] = useState<Locale>('en');
   const [messages, setMessages] = useState<Record<string, any>>({});
+
+  // Initialize locale from URL path
+  useEffect(() => {
+    const pathLocale = router.pathname.startsWith('/ja') ? 'ja' : 'en';
+    setLocaleState(pathLocale);
+  }, [router.pathname]);
 
   useEffect(() => {
     // Load translations
@@ -24,8 +32,27 @@ export function I18nProvider({ children }: { children: ReactNode }) {
 
   const setLocale = (newLocale: Locale) => {
     setLocaleState(newLocale);
+    
     if (typeof window !== 'undefined') {
       localStorage.setItem('locale', newLocale);
+      
+      // Update URL with locale prefix
+      const currentPath = router.asPath;
+      let newPath = currentPath;
+      
+      // Remove existing locale prefix
+      if (currentPath.startsWith('/ja')) {
+        newPath = currentPath.substring(3) || '/';
+      } else if (currentPath.startsWith('/en')) {
+        newPath = currentPath.substring(3) || '/';
+      }
+      
+      // Add new locale prefix (skip for default 'en')
+      if (newLocale === 'ja') {
+        newPath = `/ja${newPath}`;
+      }
+      
+      router.push(newPath);
     }
   };
 
