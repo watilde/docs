@@ -72,6 +72,8 @@ public/next-image-export-optimizer-hashes.json
 src/directory/directory.json
 src/directory/flatDirectory.json
 src/references/raw-references.json
+# Auto-generated locale pages
+src/pages/ja/
 .yarn/*
 
 #amplify-do-not-edit-begin

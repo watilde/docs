@@ -117,7 +117,7 @@
     "next-start": "next start",
     "prepare": "husky install",
     "analyze": "ANALYZE=true yarn next-build",
-    "prebuild": "node src/directory/generateDirectory.mjs && node src/directory/generateFlatDirectory.mjs",
+    "prebuild": "node src/directory/generateDirectory.mjs && node src/directory/generateFlatDirectory.mjs && node scripts/generate-locale-pages.mjs",
     "lint": "next lint",
     "clean-references": "node tasks/clean-references.mjs"
   },

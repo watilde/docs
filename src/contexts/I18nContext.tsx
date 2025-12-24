@@ -9,7 +9,6 @@ import { useRouter } from 'next/router';
 import {
   Locale,
   getLocaleFromPathname,
-  addLocaleToPathname,
   stripLocaleFromPathname,
   defaultLocale
 } from '@/i18n/config';
@@ -26,7 +25,9 @@ export function I18nProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
   const [locale, setLocaleState] = useState<Locale>(defaultLocale);
   const [messages, setMessages] = useState<Record<string, any>>({});
-  const [isNavigating, setIsNavigating] = useState(false);
+  const [fallbackMessages, setFallbackMessages] = useState<Record<string, any>>(
+    {}
+  );
 
   // Detect locale from URL
   useEffect(() => {
@@ -36,65 +37,37 @@ export function I18nProvider({ children }: { children: ReactNode }) {
 
   // Load translations when locale changes
   useEffect(() => {
-    fetch(`/locales/${locale}/common.json`)
+    // Always load English as fallback
+    fetch(`/locales/en/common.json`)
       .then((res) => res.json())
-      .then((data) => setMessages(data))
-      .catch((err) => console.error('Failed to load translations:', err));
+      .then((data) => setFallbackMessages(data))
+      .catch((err) =>
+        console.error('Failed to load fallback translations:', err)
+      );
+
+    // Load locale-specific translations
+    if (locale !== defaultLocale) {
+      fetch(`/locales/${locale}/common.json`)
+        .then((res) => res.json())
+        .then((data) => setMessages(data))
+        .catch((err) => {
+          console.warn(
+            `Failed to load ${locale} translations, using fallback:`,
+            err
+          );
+          setMessages({});
+        });
+    } else {
+      setMessages({});
+    }
   }, [locale]);
 
-  // Intercept all link clicks to add locale prefix
+  // Update HTML lang attribute
   useEffect(() => {
-    const handleClick = (e: MouseEvent) => {
-      // Prevent multiple rapid clicks
-      if (isNavigating) {
-        e.preventDefault();
-        return;
-      }
-
-      const target = e.target as HTMLElement;
-      const anchor = target.closest('a');
-
-      if (!anchor) return;
-
-      const href = anchor.getAttribute('href');
-      if (!href) return;
-
-      // Skip external links, anchors, mailto, tel, etc.
-      if (
-        href.startsWith('http://') ||
-        href.startsWith('https://') ||
-        href.startsWith('//') ||
-        href.startsWith('#') ||
-        href.startsWith('mailto:') ||
-        href.startsWith('tel:')
-      ) {
-        return;
-      }
-
-      // Check if href already has locale prefix
-      const hrefLocale = getLocaleFromPathname(href);
-      const hasCorrectLocale = hrefLocale === locale;
-
-      // If current locale is not default and link doesn't have correct locale prefix
-      if (locale !== defaultLocale && !hasCorrectLocale) {
-        e.preventDefault();
-        setIsNavigating(true);
-
-        // Strip any existing locale and add current locale
-        const pathWithoutLocale = stripLocaleFromPathname(href);
-        const localizedHref = addLocaleToPathname(pathWithoutLocale, locale);
-
-        // Simple navigation without 'as' parameter
-        router.push(localizedHref).finally(() => {
-          setIsNavigating(false);
-        });
-      }
-    };
-
-    // Use capture phase to intercept before Next.js Link
-    document.addEventListener('click', handleClick, true);
-    return () => document.removeEventListener('click', handleClick, true);
-  }, [locale, router, isNavigating]);
+    if (typeof window !== 'undefined') {
+      document.documentElement.lang = locale;
+    }
+  }, [locale]);
 
   const setLocale = (newLocale: Locale) => {
     // Get current path without locale
@@ -104,25 +77,38 @@ export function I18nProvider({ children }: { children: ReactNode }) {
     const newPath =
       newLocale === defaultLocale
         ? pathWithoutLocale
-        : addLocaleToPathname(pathWithoutLocale, newLocale);
-
-    // Update state
-    setLocaleState(newLocale);
+        : `/${newLocale}${pathWithoutLocale}`;
 
     // Navigate to new path
     router.push(newPath);
   };
 
-  // Simple translation function
+  // Translation function with fallback to English
   const t = (key: string): string => {
     const keys = key.split('.');
-    let value: any = messages;
 
+    // Try locale-specific translation first
+    let value: any = messages;
     for (const k of keys) {
       if (value && typeof value === 'object') {
         value = value[k];
       } else {
-        return key;
+        value = undefined;
+        break;
+      }
+    }
+
+    if (typeof value === 'string') {
+      return value;
+    }
+
+    // Fallback to English
+    value = fallbackMessages;
+    for (const k of keys) {
+      if (value && typeof value === 'object') {
+        value = value[k];
+      } else {
+        return key; // Return key if not found
       }
     }
 
