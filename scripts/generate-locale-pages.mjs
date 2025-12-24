@@ -34,10 +34,19 @@ function shouldSkip(relativePath) {
 }
 
 function getRelativeImportPath(fromPath, toPath) {
-  const relative = path.relative(path.dirname(fromPath), toPath);
+  const fromDir = path.dirname(fromPath);
+
+  // Calculate relative path to the full file first
+  const relative = path.relative(fromDir, toPath);
   const posixPath = relative.split(path.sep).join('/');
-  const withoutExt = posixPath.replace(/\.(tsx?|jsx?|mdx?)$/, '');
-  return withoutExt.startsWith('.') ? withoutExt : './' + withoutExt;
+
+  // Remove extension
+  const pathWithoutExt = posixPath.replace(/\.(tsx?|jsx?|mdx?)$/, '');
+
+  // Ensure it starts with ./ or ../
+  return pathWithoutExt.startsWith('.')
+    ? pathWithoutExt
+    : './' + pathWithoutExt;
 }
 
 function generateJaPage(originalPath, jaPath) {
@@ -47,8 +56,8 @@ function generateJaPage(originalPath, jaPath) {
   let content;
 
   if (extension === '.mdx') {
-    // For MDX files, just re-export
-    content = `export { default } from '${importPath}';\n`;
+    // For MDX files, include extension in import
+    content = `export { default } from '${importPath}.mdx';\n`;
   } else {
     // For TSX/JSX files, re-export everything
     content = `// Japanese locale version of this page
