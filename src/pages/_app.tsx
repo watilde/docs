@@ -6,6 +6,7 @@ import { Layout } from '@/components/Layout';
 import { useRouter } from 'next/router';
 import { useEffect } from 'react';
 import { trackPageVisit } from '../utils/track';
+import { I18nProvider } from '@/contexts/I18nContext';
 
 function MyApp({ Component, pageProps }) {
   const {
@@ -158,7 +159,9 @@ function MyApp({ Component, pageProps }) {
         ) : null}
       </Head>
 
-      <MDXProvider>{getLayout(<Component {...pageProps} />)}</MDXProvider>
+      <I18nProvider>
+        <MDXProvider>{getLayout(<Component {...pageProps} />)}</MDXProvider>
+      </I18nProvider>
 
       {BUILD_ENV === 'production' ? (
         <>
