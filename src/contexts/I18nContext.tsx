@@ -1,6 +1,18 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode
+} from 'react';
 import { useRouter } from 'next/router';
-import { Locale, getLocaleFromPathname, addLocaleToPathname, stripLocaleFromPathname } from '@/i18n/config';
+import {
+  Locale,
+  getLocaleFromPathname,
+  addLocaleToPathname,
+  stripLocaleFromPathname,
+  defaultLocale
+} from '@/i18n/config';
 
 interface I18nContextType {
   locale: Locale;
@@ -12,56 +24,103 @@ const I18nContext = createContext<I18nContextType | undefined>(undefined);
 
 export function I18nProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
-  const [locale, setLocaleState] = useState<Locale>('en');
+  const [locale, setLocaleState] = useState<Locale>(defaultLocale);
   const [messages, setMessages] = useState<Record<string, any>>({});
 
-  // Initialize locale from localStorage or URL
+  // Handle routing for locale-prefixed URLs
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      // First check URL
-      const pathLocale = getLocaleFromPathname(router.asPath);
-      
-      if (pathLocale !== 'en') {
-        // URL has explicit locale
-        setLocaleState(pathLocale);
-        localStorage.setItem('locale', pathLocale);
-      } else {
-        // Check localStorage
-        const savedLocale = localStorage.getItem('locale') as Locale;
-        if (savedLocale && savedLocale !== 'en') {
-          setLocaleState(savedLocale);
-        }
+    // Check if current URL has locale prefix
+    const pathLocale = getLocaleFromPathname(router.asPath);
+
+    if (pathLocale !== defaultLocale) {
+      // URL has locale prefix like /ja/react/start
+      // Get the path without locale
+      const pathWithoutLocale = stripLocaleFromPathname(router.asPath);
+
+      // Update state
+      setLocaleState(pathLocale);
+
+      // Rewrite the route client-side to point to the actual page
+      // This allows /ja/react/start to render /react/start with ja locale
+      if (router.pathname === '/404') {
+        // Only rewrite if we're on 404 (meaning the /ja/* page doesn't exist)
+        router.replace(pathWithoutLocale, router.asPath, { shallow: true });
       }
     }
-  }, [router.asPath]);
+  }, [router]);
 
+  // Load translations when locale changes
   useEffect(() => {
-    // Load translations
     fetch(`/locales/${locale}/common.json`)
       .then((res) => res.json())
       .then((data) => setMessages(data))
       .catch((err) => console.error('Failed to load translations:', err));
   }, [locale]);
 
+  // Intercept all link clicks to add locale prefix
+  useEffect(() => {
+    const handleClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      const anchor = target.closest('a');
+
+      if (!anchor) return;
+
+      const href = anchor.getAttribute('href');
+      if (!href) return;
+
+      // Skip external links, anchors, mailto, tel, etc.
+      if (
+        href.startsWith('http://') ||
+        href.startsWith('https://') ||
+        href.startsWith('//') ||
+        href.startsWith('#') ||
+        href.startsWith('mailto:') ||
+        href.startsWith('tel:')
+      ) {
+        return;
+      }
+
+      // Check if already has locale prefix
+      const hasLocalePrefix = /^\/[a-z]{2}(\/|$)/.test(href);
+
+      // If current locale is not default and link doesn't have locale prefix
+      if (locale !== defaultLocale && !hasLocalePrefix) {
+        e.preventDefault();
+        const localizedHref = addLocaleToPathname(href, locale);
+
+        // Use shallow routing to update URL without actually navigating
+        const actualPath = stripLocaleFromPathname(localizedHref);
+        router.push(actualPath, localizedHref, { shallow: false });
+      }
+    };
+
+    // Use capture phase to intercept before Next.js Link
+    document.addEventListener('click', handleClick, true);
+    return () => document.removeEventListener('click', handleClick, true);
+  }, [locale, router]);
+
   const setLocale = (newLocale: Locale) => {
+    // Get current path without locale
+    const pathWithoutLocale = stripLocaleFromPathname(router.asPath);
+
+    // Build new path with locale prefix
+    const newPath =
+      newLocale === defaultLocale
+        ? pathWithoutLocale
+        : addLocaleToPathname(pathWithoutLocale, newLocale);
+
+    // Update state
     setLocaleState(newLocale);
-    
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('locale', newLocale);
-      
-      // Update HTML lang attribute dynamically
-      document.documentElement.lang = newLocale;
-      
-      // Reload to ensure all page context uses new locale
-      window.location.reload();
-    }
+
+    // Navigate to new path
+    router.push(newPath);
   };
 
   // Simple translation function
   const t = (key: string): string => {
     const keys = key.split('.');
     let value: any = messages;
-    
+
     for (const k of keys) {
       if (value && typeof value === 'object') {
         value = value[k];
@@ -69,7 +128,7 @@ export function I18nProvider({ children }: { children: ReactNode }) {
         return key;
       }
     }
-    
+
     return typeof value === 'string' ? value : key;
   };
 
