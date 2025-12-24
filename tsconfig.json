@@ -16,6 +16,7 @@
     "paths": {
       "@/components/*": ["src/components/*"],
       "@/constants/*": ["src/constants/*"],
+      "@/contexts/*": ["src/contexts/*"],
       "@/data/*": ["src/data/*"],
       "@/plugins/*": ["src/plugins/*"],
       "@/protected/*": ["src/protected/*"],
