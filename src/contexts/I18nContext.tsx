@@ -26,28 +26,13 @@ export function I18nProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
   const [locale, setLocaleState] = useState<Locale>(defaultLocale);
   const [messages, setMessages] = useState<Record<string, any>>({});
+  const [isNavigating, setIsNavigating] = useState(false);
 
-  // Handle routing for locale-prefixed URLs
+  // Detect locale from URL
   useEffect(() => {
-    // Check if current URL has locale prefix
     const pathLocale = getLocaleFromPathname(router.asPath);
-
-    if (pathLocale !== defaultLocale) {
-      // URL has locale prefix like /ja/react/start
-      // Get the path without locale
-      const pathWithoutLocale = stripLocaleFromPathname(router.asPath);
-
-      // Update state
-      setLocaleState(pathLocale);
-
-      // Rewrite the route client-side to point to the actual page
-      // This allows /ja/react/start to render /react/start with ja locale
-      if (router.pathname === '/404') {
-        // Only rewrite if we're on 404 (meaning the /ja/* page doesn't exist)
-        router.replace(pathWithoutLocale, router.asPath, { shallow: true });
-      }
-    }
-  }, [router]);
+    setLocaleState(pathLocale);
+  }, [router.asPath]);
 
   // Load translations when locale changes
   useEffect(() => {
@@ -60,6 +45,12 @@ export function I18nProvider({ children }: { children: ReactNode }) {
   // Intercept all link clicks to add locale prefix
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
+      // Prevent multiple rapid clicks
+      if (isNavigating) {
+        e.preventDefault();
+        return;
+      }
+
       const target = e.target as HTMLElement;
       const anchor = target.closest('a');
 
@@ -80,24 +71,30 @@ export function I18nProvider({ children }: { children: ReactNode }) {
         return;
       }
 
-      // Check if already has locale prefix
-      const hasLocalePrefix = /^\/[a-z]{2}(\/|$)/.test(href);
+      // Check if href already has locale prefix
+      const hrefLocale = getLocaleFromPathname(href);
+      const hasCorrectLocale = hrefLocale === locale;
 
-      // If current locale is not default and link doesn't have locale prefix
-      if (locale !== defaultLocale && !hasLocalePrefix) {
+      // If current locale is not default and link doesn't have correct locale prefix
+      if (locale !== defaultLocale && !hasCorrectLocale) {
         e.preventDefault();
-        const localizedHref = addLocaleToPathname(href, locale);
+        setIsNavigating(true);
 
-        // Use shallow routing to update URL without actually navigating
-        const actualPath = stripLocaleFromPathname(localizedHref);
-        router.push(actualPath, localizedHref, { shallow: false });
+        // Strip any existing locale and add current locale
+        const pathWithoutLocale = stripLocaleFromPathname(href);
+        const localizedHref = addLocaleToPathname(pathWithoutLocale, locale);
+
+        // Simple navigation without 'as' parameter
+        router.push(localizedHref).finally(() => {
+          setIsNavigating(false);
+        });
       }
     };
 
     // Use capture phase to intercept before Next.js Link
     document.addEventListener('click', handleClick, true);
     return () => document.removeEventListener('click', handleClick, true);
-  }, [locale, router]);
+  }, [locale, router, isNavigating]);
 
   const setLocale = (newLocale: Locale) => {
     // Get current path without locale
