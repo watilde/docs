@@ -100,7 +100,7 @@ export const LayoutHeader = ({
               transformItems={transformItems}
             />
           </View>
-          <View style={{ marginLeft: '0.5rem', display: 'flex', alignItems: 'center' }}>
+          <View style={{ marginLeft: '0.25rem', display: 'flex', alignItems: 'center', flexShrink: 0 }}>
             <LanguageSwitcher />
           </View>
         </View>

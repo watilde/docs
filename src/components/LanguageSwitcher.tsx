@@ -10,14 +10,15 @@ export function LanguageSwitcher() {
       value={locale}
       onChange={(e) => setLocale(e.target.value as Locale)}
       style={{
-        padding: '0.25rem 0.5rem',
-        fontSize: '0.875rem',
+        padding: '0.25rem 0.25rem',
+        fontSize: '0.75rem',
         borderRadius: '4px',
-        border: '1px solid #ccc',
+        border: '1px solid #ddd',
         cursor: 'pointer',
         backgroundColor: 'white',
-        minWidth: 'auto',
-        maxWidth: '100px'
+        height: '32px',
+        minWidth: '50px',
+        maxWidth: '60px'
       }}
     >
       <option value="en">EN</option>
