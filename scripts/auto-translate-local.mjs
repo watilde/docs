@@ -32,6 +32,9 @@ const JA_PATH = path.join(__dirname, '../public/locales/ja/common.json');
 console.log('🌐 Auto-translation (Local Model) starting...');
 console.log('📦 Using: Xenova/opus-mt-en-jap (300MB)\n');
 
+// Disable sharp (image processing) - we only need text translation
+process.env.TRANSFORMERS_DISABLE_SHARP = '1';
+
 // Check if transformers is installed
 let pipeline;
 try {
@@ -39,12 +42,25 @@ try {
   pipeline = transformers.pipeline;
   console.log('✅ @huggingface/transformers loaded successfully\n');
 } catch (error) {
-  console.log('⚠️  @huggingface/transformers not installed (optional)');
-  console.log('   Error code:', error.code);
-  console.log('   Error message:', error.message);
-  console.log('\n   Possible causes:');
+  // Check if it's a sharp error (image processing dependency we don't need)
+  const isSharpError =
+    error.message && error.message.toLowerCase().includes('sharp');
+
+  if (isSharpError) {
+    console.log('⚠️  Note: Sharp (image processing) is unavailable');
+    console.log('   This is OK - we only use text translation\n');
+  } else {
+    console.log('⚠️  @huggingface/transformers not installed (optional)');
+    console.log('   Error code:', error.code);
+    console.log('   Error message:', error.message);
+  }
+
+  console.log('   Possible causes:');
   console.log('   - Package not installed: Run `yarn install`');
   console.log('   - Node version too old: Requires Node 18+ (run `node -v`)');
+  console.log(
+    '   - Missing native dependencies: Run `yarn add sharp --ignore-engines`'
+  );
   console.log(
     '   - Corrupt installation: Run `rm -rf node_modules && yarn install`'
   );

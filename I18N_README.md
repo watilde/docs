@@ -129,30 +129,52 @@ If you see this warning during `yarn dev`:
 ⚠️  @huggingface/transformers not installed (optional)
 ```
 
-**Cause**: The package is in `package.json` but not installed in `node_modules`.
+**Common causes and solutions:**
 
-**Solutions**:
+#### 1. **Sharp (image processing) error**
 
-1. **Install dependencies** (most common):
-   ```bash
-   yarn install
-   ```
+If the error mentions `sharp` or `Could not load the "sharp" module`:
 
-2. **Clean install** (if yarn.lock is out of sync):
-   ```bash
-   rm -rf node_modules
-   yarn install
-   ```
+```bash
+Error message: Could not load the "sharp" module using the linux-x64 runtime
+```
 
-3. **Verify installation**:
-   ```bash
-   ls node_modules/@huggingface/transformers
-   ```
+**Solution**: This error is harmless for text translation. The script automatically disables `sharp` (we only use text translation, not image processing).
 
-4. **Manual install** (as a last resort):
-   ```bash
-   yarn add -D @huggingface/transformers
-   ```
+If the error persists, install sharp manually:
+
+```bash
+yarn add sharp --ignore-engines
+# or
+npm install --include=optional sharp
+```
+
+#### 2. **Package not installed**
+
+The package is in `package.json` but not installed in `node_modules`:
+
+```bash
+yarn install
+```
+
+#### 3. **Clean install** (if yarn.lock is out of sync)
+
+```bash
+rm -rf node_modules
+yarn install
+```
+
+#### 4. **Verify installation**
+
+```bash
+ls node_modules/@huggingface/transformers
+```
+
+#### 5. **Manual install** (as a last resort)
+
+```bash
+yarn add -D @huggingface/transformers
+```
 
 **Note**: Auto-translation is optional. The app works fine without it - you can add Japanese translations manually to `public/locales/ja/common.json`.
 
