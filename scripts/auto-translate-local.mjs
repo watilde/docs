@@ -38,10 +38,13 @@ try {
   const transformers = await import('@huggingface/transformers');
   pipeline = transformers.pipeline;
 } catch (error) {
-  console.error('❌ @huggingface/transformers not installed');
-  console.error('   Run: yarn add -D @huggingface/transformers');
-  console.error('   Or: npm install -D @huggingface/transformers');
-  process.exit(1);
+  console.log('⚠️  @huggingface/transformers not installed (optional)');
+  console.log('   To enable auto-translation, run:');
+  console.log('   yarn add -D @huggingface/transformers\n');
+  console.log(
+    '✅ Skipping auto-translation (translations can be added manually)\n'
+  );
+  process.exit(0);
 }
 
 // Load translation files
