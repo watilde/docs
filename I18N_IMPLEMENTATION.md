@@ -3,45 +3,51 @@
 ## Problem
 Next.js static export (`output: 'export'`) doesn't support:
 - Middleware
-- Server-side rewrites
+- Server-side rewrites  
 - Dynamic getStaticPaths with fallback
 
 But we want URLs like `/ja/react/start` to work!
 
-## Solution: Client-Side URL Rewriting
+## Solution: 404-Based Client-Side Routing
 
 ### How It Works
 
-1. **URL Detection**
+1. **Initial Request**
    - User accesses: `http://localhost:3000/ja/react/start`
-   - `I18nContext` detects locale from URL: `ja`
+   - File doesn't exist → Shows 404 page
    
-2. **Automatic Rewriting**
-   - If `/ja/react/start` page doesn't exist (404)
-   - Client-side rewrite to: `/react/start`
-   - URL bar still shows: `/ja/react/start` (using Next.js `router.push(url, as)`)
+2. **404 Page Intercepts**
+   - 404 page detects `/ja/` locale prefix
+   - Extracts actual path: `/react/start`
+   - Uses `router.replace(actualPath, localeURL)` to load the real page
+   - URL bar displays: `/ja/react/start`
+   - Page renders: `/react/start` with Japanese locale context
    
 3. **Link Interception**
-   - All `<a>` click events are intercepted
+   - All `<a>` click events are intercepted by `I18nContext`
    - If locale is `ja`, automatically add prefix:
-     - `/react/start` → `/ja/react/start`
-   - Uses `router.push(realPath, displayedPath)`
-
-4. **Translations**
-   - `I18nContext` loads `/locales/ja/common.json`
-   - All `t()` calls show Japanese text
-   - HTML `lang` attribute set to `ja`
+     - Click `/react/how-amplify-works` → Navigate to `/ja/react/how-amplify-works`
+   - Uses simple `router.push()` navigation
+   
+4. **Locale Detection**
+   - `I18nContext` detects locale from URL path
+   - Loads appropriate translations from `/locales/{locale}/common.json`
+   - All `t()` calls show translated text
+   - HTML `lang` attribute updates automatically
 
 ### File Structure
 
 ```
 src/
 ├── contexts/
-│   └── I18nContext.tsx        # Main i18n logic
+│   └── I18nContext.tsx        # Main i18n logic + link interception
 ├── i18n/
-│   └── config.ts              # Locale utilities
+│   └── config.ts              # Locale utilities (getLocaleFromPathname, etc.)
 ├── components/
+│   ├── LanguageSwitcher.tsx   # Language switcher component
 │   └── LocalizedLink.tsx      # Optional localized Link wrapper
+├── pages/
+│   └── 404.tsx                # Custom 404 with locale redirect logic
 public/
 └── locales/
     ├── en/
@@ -50,20 +56,41 @@ public/
         └── common.json        # Japanese translations
 ```
 
+### Key Files
+
+#### `src/pages/404.tsx`
+The magic happens here! Detects locale-prefixed URLs and redirects to the actual page:
+
+```tsx
+const pathLocale = getLocaleFromPathname(path);
+if (pathLocale !== defaultLocale) {
+  const pathWithoutLocale = stripLocaleFromPathname(path);
+  router.replace(pathWithoutLocale, path, { shallow: false });
+}
+```
+
+#### `src/contexts/I18nContext.tsx`
+Handles:
+- Locale detection from URL
+- Translation loading
+- Link click interception
+- Locale switching
+
 ### Key Benefits
 
 ✅ **Works with static export** - No server-side logic needed
-✅ **SEO-friendly URLs** - `/ja/` prefix in URLs
-✅ **No page duplication** - Single source of truth
-✅ **Automatic locale persistence** - Links remember language
+✅ **SEO-friendly URLs** - `/ja/` prefix visible in URLs  
+✅ **No page duplication** - Single source of truth for all locales
+✅ **Automatic locale persistence** - Links remember language choice
 ✅ **Clean HTML** - `<html lang="ja">` for accessibility
+✅ **No navigation errors** - Prevents "hard navigate to same URL" issues
 
 ### Usage Examples
 
 #### In Components
 
 ```tsx
-import { useI18n } from '@/contexts/I18nContext';
+import { useI18n } from '@/contexts/I18n Context';
 
 export function MyComponent() {
   const { t, locale } = useI18n();
@@ -121,10 +148,14 @@ export function MyComponent() {
    ```
    http://localhost:3000/ja/react/start
    ```
+   - Initially shows 404 briefly
+   - Automatically redirects to actual page
+   - URL stays as `/ja/react/start`
+   - Content displays in Japanese
 
 4. Switch language:
    - Use the language switcher in the header (top right)
-   - Or manually change URL from `/react/start` to `/ja/react/start`
+   - Click any link - it will maintain the `/ja/` prefix
 
 ### Adding More Languages
 
@@ -149,26 +180,32 @@ That's it! The system automatically handles:
 - URL routing (`/es/...`)
 - Link prefixing
 - Locale detection
+- 404-based redirection
 
 ### Technical Details
 
-- **Router.push 'as' parameter**: Allows displaying one URL while loading another
+- **404-based routing**: Leverages Next.js 404 page to handle "missing" locale URLs
+- **router.replace with 'as'**: Displays localized URL while loading actual page
 - **Event capture**: Intercepts clicks before Next.js Link processes them
-- **Shallow routing**: Updates URL without full page reload when possible
-- **Client-side only**: No server-side code, works in static export
+- **Client-side only**: No server-side code, works perfectly with static export
+- **Navigation state**: Uses `isNavigating` flag to prevent duplicate clicks
 
 ### Limitations
 
-- Initial page load of `/ja/...` shows brief flash (404 then rewrite)
-  - Can be improved with custom 404 page
-- Search engines may see this as client-side routing
-  - Consider adding hreflang tags for SEO
+- Initial page load of `/ja/...` shows brief 404 flash
+  - This is inherent to the approach (file doesn't exist)
+  - Could be improved with loading state in 404 page
+- Search engines see client-side routing
+  - Consider adding `hreflang` tags for SEO
+  - Or pre-generate all locale pages at build time
 - Build output doesn't include `/ja/` HTML files
-  - Files are generated on-demand client-side
+  - Files are "virtual" - generated client-side via 404 redirect
 
 ### Future Improvements
 
-1. **Pre-generate locale pages** at build time
-2. **Add hreflang tags** for better SEO
-3. **Implement locale subdomain support** (`ja.docs.amplify.aws`)
-4. **Add locale auto-detection** from browser settings
+1. **Loading state in 404 page** - Show spinner during redirect
+2. **Pre-generate locale pages** at build time for true static files
+3. **Add hreflang tags** for better SEO
+4. **Locale subdomain support** (`ja.docs.amplify.aws`)
+5. **Browser locale auto-detection** from `navigator.language`
+6. **Locale in localStorage** as fallback for returning users
