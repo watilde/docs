@@ -1,6 +1,7 @@
 import crypto from 'crypto';
 import Document, { Html, Head, Main, NextScript } from 'next/document';
 import { ALGOLIA_APP_ID } from '../constants/algolia';
+import { getLocaleFromPathname } from '@/i18n/config';
 
 const cspHashOf = (text) => {
   const hash = crypto.createHash('sha256');
@@ -109,9 +110,9 @@ const getCspContent = (context) => {
 
 export default class MyDocument extends Document {
   render() {
-    // Get locale from pathname
+    // Get locale from pathname using utility function
     const pathname = this.props.__NEXT_DATA__.page;
-    const locale = pathname.startsWith('/ja') ? 'ja' : 'en';
+    const locale = getLocaleFromPathname(pathname);
     
     return (
       <Html lang={locale}>
