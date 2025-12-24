@@ -17,9 +17,34 @@ export function I18nProvider({ children }: { children: ReactNode }) {
 
   // Initialize locale from URL path
   useEffect(() => {
-    const pathLocale = getLocaleFromPathname(router.pathname);
+    const pathLocale = getLocaleFromPathname(router.asPath);
     setLocaleState(pathLocale);
-  }, [router.pathname]);
+  }, [router.asPath]);
+
+  // Intercept route changes to preserve locale
+  useEffect(() => {
+    const handleRouteChangeStart = (url: string) => {
+      // If navigating to a URL without locale, add current locale
+      const targetLocale = getLocaleFromPathname(url);
+      
+      // If URL has no locale but we have one set, add it
+      if (targetLocale === 'en' && locale !== 'en' && !url.startsWith(`/${locale}`)) {
+        const cleanUrl = stripLocaleFromPathname(url);
+        const localizedUrl = addLocaleToPathname(cleanUrl, locale);
+        
+        // Only redirect if the URL actually changed
+        if (localizedUrl !== url) {
+          router.push(localizedUrl);
+        }
+      }
+    };
+
+    router.events.on('routeChangeStart', handleRouteChangeStart);
+
+    return () => {
+      router.events.off('routeChangeStart', handleRouteChangeStart);
+    };
+  }, [router, locale]);
 
   useEffect(() => {
     // Load translations
