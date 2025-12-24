@@ -10,14 +10,18 @@ export function LanguageSwitcher() {
       value={locale}
       onChange={(e) => setLocale(e.target.value as Locale)}
       style={{
-        padding: '0.5rem',
+        padding: '0.25rem 0.5rem',
+        fontSize: '0.875rem',
         borderRadius: '4px',
         border: '1px solid #ccc',
-        cursor: 'pointer'
+        cursor: 'pointer',
+        backgroundColor: 'white',
+        minWidth: 'auto',
+        maxWidth: '100px'
       }}
     >
-      <option value="en">English</option>
-      <option value="ja">日本語</option>
+      <option value="en">EN</option>
+      <option value="ja">JA</option>
     </select>
   );
 }
