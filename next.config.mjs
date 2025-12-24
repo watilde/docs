@@ -2,6 +2,7 @@ import { createRequire } from 'module';
 import dotenv from 'dotenv';
 import createMDX from '@next/mdx';
 import rehypeMdxCodeProps from 'rehype-mdx-code-props';
+import createNextIntlPlugin from 'next-intl/plugin';
 
 const require = createRequire(import.meta.url);
 import rehypeImgSize from 'rehype-img-size';
@@ -9,6 +10,8 @@ import remarkGfm from 'remark-gfm';
 import rehypeSlug from 'rehype-slug';
 
 dotenv.config({ path: './.env.custom' });
+
+const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts');
 
 const nextJSConfig = () => {
   const withMDX = createMDX({
@@ -80,7 +83,8 @@ const nextJSConfig = () => {
     nextConfig = withNextBundleAnalyzer(nextConfig);
   }
 
-  return nextConfig;
+  // Wrap with next-intl plugin
+  return withNextIntl(nextConfig);
 };
 
 export default nextJSConfig;
