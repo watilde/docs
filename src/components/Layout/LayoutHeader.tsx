@@ -19,7 +19,6 @@ import { PageLastUpdated } from '../PageLastUpdated';
 import Feedback from '../Feedback';
 import RepoActions from '../Menu/RepoActions';
 import { usePathWithoutHash } from '@/utils/usePathWithoutHash';
-import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 
 export const LayoutHeader = ({
   currentPlatform,
@@ -100,10 +99,6 @@ export const LayoutHeader = ({
               transformItems={transformItems}
             />
           </View>
-        </View>
-        
-        <View style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', paddingRight: '1rem' }}>
-          <LanguageSwitcher />
         </View>
       </Flex>
       <View

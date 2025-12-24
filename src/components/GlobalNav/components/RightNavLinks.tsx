@@ -2,6 +2,7 @@ import { Flex, View } from '@aws-amplify/ui-react';
 import { NavMenuLink } from './NavMenuLink';
 import { SocialNavLinks } from './SocialNavLinks';
 import { NavMenuItem } from '../GlobalNav';
+import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 
 interface RightNavLinksProps {
   rightLinks: NavMenuItem[];
@@ -29,6 +30,9 @@ export function RightNavLinks({
       {socialLinks ? (
         <SocialNavLinks socialLinks={socialLinks} currentSite={currentSite} />
       ) : null}
+      <View style={{ display: 'flex', alignItems: 'center', marginLeft: '1rem' }}>
+        <LanguageSwitcher />
+      </View>
     </Flex>
   );
 }
