@@ -4,5 +4,17 @@
     "description": "AWS Amplifyは、ウェブおよびモバイルアプリを構築するために必要なすべてを提供します。簡単に始められ、簡単にスケールできます。",
     "getStarted": "始める",
     "learnMore": "詳細を見る"
+  },
+  "home": {
+    "title": "Amplifyドキュメント",
+    "description": "AWS Amplifyは、ウェブおよびモバイルアプリを構築するために必要なすべてを提供します。簡単に始められ、簡単にスケールできます。",
+    "fullDescription": "Amplifyのバックエンド構築機能を使用してフルスタックアプリを構築し、Amplify Hostingを使用してウェブアプリをデプロイできます。",
+    "deployApp": "アプリをデプロイ",
+    "howAmplifyWorks": "Amplifyの仕組み >",
+    "buildFullstack": "お好みのフレームワークでフルスタックアプリを構築",
+    "frameworkDescription": "JavaScript、Flutter、Swift、Reactなどの人気のあるウェブおよびモバイルフレームワークでAWS Amplifyを使用できます。AWS上でフルスタックアプリを構築、接続、ホストします。お好みのフレームワークを選択して始めましょう。",
+    "features": "機能",
+    "codeFirstDX": "コードファースト開発体験",
+    "codeFirstDescription": "フルスタックTypeScript開発体験により、インフラストラクチャではなくアプリコードに集中できます。"
   }
 }

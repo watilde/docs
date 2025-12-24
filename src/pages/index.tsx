@@ -16,6 +16,7 @@ import {
   gen2HowAmplifyWorksPathname
 } from '@/data/index-page-data';
 import { ExternalLinkButton } from '@/components/ExternalLinkButton';
+import { useI18n } from '@/contexts/I18nContext';
 
 const meta = {
   title: 'Amplify Documentation',
@@ -37,19 +38,19 @@ export function getStaticProps() {
 }
 
 export default function Page() {
+  const { t } = useI18n();
+  
   return (
     <Flex className="home-content">
       <Flex className="home-intro">
         <Heading level={1} className="home-intro__heading">
-          Amplify Documentation
+          {t('home.title')}
         </Heading>
         <Text className="home-intro__text">
-          AWS Amplify is everything you need to build web and mobile apps. Easy
-          to start, easy to scale.
+          {t('home.description')}
           <br></br>
           <br></br>
-          You can build a fullstack app using Amplify backend building
-          capabilities and deploy your web app using Amplify Hosting.
+          {t('home.fullDescription')}
         </Text>
         <Flex className="home-cta">
           <GetStartedPopover
@@ -60,7 +61,7 @@ export default function Page() {
             size="large"
             href="https://console.aws.amazon.com/amplify/create/repo-branch"
           >
-            Deploy your app
+            {t('home.deployApp')}
           </ExternalLinkButton>
         </Flex>
         <Link
@@ -69,32 +70,28 @@ export default function Page() {
             query: { platform: DEFAULT_PLATFORM }
           }}
         >
-          How Amplify works &gt;
+          {t('home.howAmplifyWorks')}
         </Link>
       </Flex>
       <Flex className="home-section">
         <Heading level={2}>
-          Build fullstack apps with your framework of choice
+          {t('home.buildFullstack')}
         </Heading>
         <Text>
-          You can use AWS Amplify with popular web and mobile frameworks like
-          JavaScript, Flutter, Swift, and React. Build, connect, and host
-          fullstack apps on AWS. Get started by selecting your preferred
-          framework.
+          {t('home.frameworkDescription')}
         </Text>
         <FrameworkGrid currentKey={DEFAULT_PLATFORM} />
       </Flex>
       <Flex className="home-section">
-        <Heading level={2}>Features</Heading>
+        <Heading level={2}>{t('home.features')}</Heading>
         <Columns columns={3}>
           <Card variation="outlined">
             <Flex direction="column">
               <Heading level={3} fontSize="medium">
-                Code-first DX
+                {t('home.codeFirstDX')}
               </Heading>
               <Text>
-                The fullstack TypeScript developer experience lets you focus on
-                your app code instead of infrastructure.
+                {t('home.codeFirstDescription')}
               </Text>
             </Flex>
           </Card>
@@ -222,6 +219,20 @@ export default function Page() {
           <FeatureItem
             linkText="GUI to manage your data"
             href={{
+              pathname: '/[platform]/how-amplify-works/concepts',
+              hash: 'unified-management-console',
+              query: { platform: DEFAULT_PLATFORM }
+            }}
+          >
+            Manage your app data, users and groups, and files in a single
+            console.
+          </FeatureItem>
+        </FeatureList>
+
+        <FeatureList heading="Customize" level={2}>
+          <FeatureItem
+            linkText="Add any AWS service with CDK"
+                href={{
               pathname: '/[platform]/how-amplify-works/concepts',
               hash: 'unified-management-console',
               query: { platform: DEFAULT_PLATFORM }

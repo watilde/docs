@@ -19,6 +19,7 @@ import { PageLastUpdated } from '../PageLastUpdated';
 import Feedback from '../Feedback';
 import RepoActions from '../Menu/RepoActions';
 import { usePathWithoutHash } from '@/utils/usePathWithoutHash';
+import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 
 export const LayoutHeader = ({
   currentPlatform,
@@ -98,6 +99,9 @@ export const LayoutHeader = ({
               }}
               transformItems={transformItems}
             />
+          </View>
+          <View style={{ marginLeft: '1rem' }}>
+            <LanguageSwitcher />
           </View>
         </View>
       </Flex>

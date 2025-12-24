@@ -4,5 +4,17 @@
     "description": "AWS Amplify is everything you need to build web and mobile apps. Easy to start, easy to scale.",
     "getStarted": "Get Started",
     "learnMore": "Learn More"
+  },
+  "home": {
+    "title": "Amplify Documentation",
+    "description": "AWS Amplify is everything you need to build web and mobile apps. Easy to start, easy to scale.",
+    "fullDescription": "You can build a fullstack app using Amplify backend building capabilities and deploy your web app using Amplify Hosting.",
+    "deployApp": "Deploy your app",
+    "howAmplifyWorks": "How Amplify works >",
+    "buildFullstack": "Build fullstack apps with your framework of choice",
+    "frameworkDescription": "You can use AWS Amplify with popular web and mobile frameworks like JavaScript, Flutter, Swift, and React. Build, connect, and host fullstack apps on AWS. Get started by selecting your preferred framework.",
+    "features": "Features",
+    "codeFirstDX": "Code-first DX",
+    "codeFirstDescription": "The fullstack TypeScript developer experience lets you focus on your app code instead of infrastructure."
   }
 }
