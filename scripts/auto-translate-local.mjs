@@ -37,13 +37,19 @@ let pipeline;
 try {
   const transformers = await import('@huggingface/transformers');
   pipeline = transformers.pipeline;
+  console.log('✅ @huggingface/transformers loaded successfully\n');
 } catch (error) {
   console.log('⚠️  @huggingface/transformers not installed (optional)');
-  console.log('   Error:', error.message);
-  console.log('\n   To enable auto-translation:');
-  console.log('   1. Run: yarn install (to install from package.json)');
-  console.log('   2. Or run: yarn add -D @huggingface/transformers');
-  console.log('   3. Verify: ls node_modules/@huggingface/transformers\n');
+  console.log('   Error code:', error.code);
+  console.log('   Error message:', error.message);
+  console.log('\n   Possible causes:');
+  console.log('   - Package not installed: Run `yarn install`');
+  console.log('   - Node version too old: Requires Node 18+ (run `node -v`)');
+  console.log(
+    '   - Corrupt installation: Run `rm -rf node_modules && yarn install`'
+  );
+  console.log('\n   To verify installation:');
+  console.log('   ls node_modules/@huggingface/transformers\n');
   console.log(
     '✅ Skipping auto-translation (translations can be added manually)\n'
   );
