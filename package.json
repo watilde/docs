@@ -119,7 +119,10 @@
     "analyze": "ANALYZE=true yarn next-build",
     "prebuild": "node src/directory/generateDirectory.mjs && node src/directory/generateFlatDirectory.mjs && node scripts/generate-locale-pages.mjs",
     "lint": "next lint",
-    "clean-references": "node tasks/clean-references.mjs"
+    "clean-references": "node tasks/clean-references.mjs",
+    "translate": "node scripts/auto-translate.mjs --model gemini-flash",
+    "translate:local": "node scripts/auto-translate-local.mjs",
+    "translate:check": "node -e \"const en=require('./public/locales/en/common.json'); const ja=require('./public/locales/ja/common.json'); const count=(o)=>JSON.stringify(o).split('\":\"').length-1; console.log('EN:',count(en),'JA:',count(ja),'Missing:',count(en)-count(ja))\""
   },
   "overrides": {
     "tmp": "^0.2.4"
