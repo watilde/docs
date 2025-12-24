@@ -84,6 +84,43 @@ See [I18N_IMPLEMENTATION.md](./I18N_IMPLEMENTATION.md) for detailed instructions
 
 ## Troubleshooting
 
+### Yarn Version
+
+This project requires **Yarn v4.9.0** (specified in `package.json`). Check your version:
+
+```bash
+yarn --version
+# Should show 4.9.0
+```
+
+**If you see a different version:**
+
+1. **Enable Corepack** (Node 16.10+ includes Corepack):
+   ```bash
+   corepack enable
+   ```
+
+2. **Corepack will automatically use the correct Yarn version** specified in `package.json`.
+
+3. **Install dependencies**:
+   ```bash
+   yarn install
+   ```
+
+**If you're stuck on Yarn v1 (Classic)**:
+
+The project may work with Yarn v1, but there could be compatibility issues. If you encounter problems:
+
+```bash
+# Try upgrading to Yarn v4
+corepack enable
+yarn set version 4.9.0
+
+# Or use npx to run with correct version
+npx yarn@4.9.0 install
+npx yarn@4.9.0 dev
+```
+
 ### `@huggingface/transformers not installed` Error
 
 If you see this warning during `yarn dev`:
